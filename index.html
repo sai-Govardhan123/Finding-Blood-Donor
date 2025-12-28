@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Blood Donor Finder</title>
+</head>
+
+<body style="font-family:Arial;text-align:center">
+
+<h1>🩸 Blood Donor Finder</h1>
+
+<h2>Register Donor</h2>
+<input id="name" placeholder="Name"><br>
+<input id="blood_group" placeholder="Blood Group"><br>
+<input id="age" type="number" placeholder="Age"><br>
+<input id="phone" placeholder="Phone"><br>
+<input id="city" placeholder="City"><br><br>
+<button onclick="registerDonor()">Register</button>
+
+<hr>
+
+<h2>Search Donor</h2>
+<input id="search_bg" placeholder="Blood Group">
+<input id="search_city" placeholder="City">
+<button onclick="searchDonor()">Search</button>
+
+<br><br>
+
+<table border="1" align="center" id="resultTable" style="display:none">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Blood Group</th>
+            <th>Age</th>
+            <th>Phone</th>
+            <th>City</th>
+        </tr>
+    </thead>
+    <tbody id="resultBody"></tbody>
+</table>
+
+<script>
+function registerDonor() {
+    fetch("/register", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            name: document.getElementById("name").value,
+            blood_group: document.getElementById("blood_group").value,
+            age: document.getElementById("age").value,
+            phone: document.getElementById("phone").value,
+            city: document.getElementById("city").value
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message);   // 👈 THIS shows success
+    })
+    .catch(error => {
+        alert("Error registering donor");
+        console.error(error);
+    });
+}
+</script>
+
+
+<script>
+function searchDonor() {
+    fetch('/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            blood_group: document.getElementById("search_bg").value,
+            city: document.getElementById("search_city").value
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        const table = document.getElementById("resultTable");
+        const body = document.getElementById("resultBody");
+        body.innerHTML = "";
+
+        if (data.length === 0) {
+            alert("No donors found");
+            table.style.display = "none";
+            return;
+        }
+
+        table.style.display = "table";
+
+        data.forEach(d => {
+            body.innerHTML += `
+                <tr>
+                    <td>${d.name}</td>
+                    <td>${d.blood_group}</td>
+                    <td>${d.age}</td>
+                    <td>${d.phone}</td>
+                    <td>${d.city}</td>
+                </tr>
+            `;
+        });
+    })
+    .catch(error => {
+        console.error("Search error:", error);
+    });
+}
+</script>
+
+
+</body>
+</html>
